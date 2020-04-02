@@ -42,6 +42,8 @@ namespace NEP5
                 if (method == "totalSupply") return TotalSupply();
 
                 if (method == "transfer") return Transfer((byte[])args[0], (byte[])args[1], (BigInteger)args[2], callscript);
+
+                if (method == "update") return Update((byte[])args[0], (string)args[1]);
             }
             return false;
         }
@@ -126,6 +128,14 @@ namespace NEP5
             asset.Put(to, toAmount + amount);
 
             Transferred(from, to, amount);
+            return true;
+        }
+
+        [DisplayName("update")]
+        public static bool Update(byte[] script, string manifest)
+        {
+            if (!Runtime.CheckWitness(Owner)) return false;
+            Contract.Update(script, manifest);
             return true;
         }
     }
