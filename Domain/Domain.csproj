@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -9,6 +9,14 @@
     </Message>
     <Exec Command="neon -f &quot;$(TargetPath)&quot; -o" />
   </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Neo.SmartContract.Framework" Version="3.0.0-CI00154" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StorageExample\StorageExample.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Neo.SmartContract.Framework">

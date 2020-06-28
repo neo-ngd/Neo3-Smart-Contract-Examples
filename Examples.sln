@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NEP5", "NEP5\NEP5.csproj", "{0CACF274-5E8F-4C38-8490-FE6623E04FE3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tools", "Tools\Tools.csproj", "{75A9A085-E49A-4CD5-B5C0-9FE4F1D60CC3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dynamic Call", "Dynamic Call\Dynamic Call.csproj", "{F88338D9-D95B-49EE-ACA3-7C694E186CAC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization", "Serialization\Serialization.csproj", "{BE9A688C-0FAE-44BA-ACE6-5BF262585BAC}"
@@ -15,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Native", "Native\Native.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StorageExample", "StorageExample\StorageExample.csproj", "{223E9AFC-A26D-4772-A65F-3FD89B2DD174}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{2667419A-DF37-4A85-A62C-68DC7928EC3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{2667419A-DF37-4A85-A62C-68DC7928EC3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +25,6 @@ Global
 		{0CACF274-5E8F-4C38-8490-FE6623E04FE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CACF274-5E8F-4C38-8490-FE6623E04FE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CACF274-5E8F-4C38-8490-FE6623E04FE3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{75A9A085-E49A-4CD5-B5C0-9FE4F1D60CC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75A9A085-E49A-4CD5-B5C0-9FE4F1D60CC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75A9A085-E49A-4CD5-B5C0-9FE4F1D60CC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75A9A085-E49A-4CD5-B5C0-9FE4F1D60CC3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F88338D9-D95B-49EE-ACA3-7C694E186CAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F88338D9-D95B-49EE-ACA3-7C694E186CAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F88338D9-D95B-49EE-ACA3-7C694E186CAC}.Release|Any CPU.ActiveCfg = Release|Any CPU

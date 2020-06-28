@@ -5,11 +5,14 @@ using System.Numerics;
 
 namespace Native_
 {
+    [ManifestExtra("Author", "Chen, Zhitong")]
+    [ManifestExtra("Email", "chenzhitong@onchain.com")]
+    [ManifestExtra("Description", "This is a example")]
     public class Contract1 : SmartContract
     {
         private static readonly byte[] Me = "NfKA6zAixybBHHpmaPYPDywoqDaKzfMPf9".ToScriptHash();
 
-        public static object Main(string operation, object[] args)
+        public static object Test(string operation)
         {
             var neoDecimals = (BigInteger)Native.NEO("decimals", new object[] { Me });
             var gasDecimals = (BigInteger)Native.GAS("decimals", new object[] { Me });

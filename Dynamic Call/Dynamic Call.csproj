@@ -11,6 +11,10 @@
   </Target>
 
   <ItemGroup>
+    <PackageReference Include="Neo.SmartContract.Framework" Version="3.0.0-CI00154" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Neo.SmartContract.Framework">
       <HintPath>C:\Users\chenz\source\repos\NeoContract3\NeoContract3\Neo.SmartContract.Framework.dll</HintPath>
     </Reference>

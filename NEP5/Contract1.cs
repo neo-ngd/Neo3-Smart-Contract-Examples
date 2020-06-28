@@ -7,144 +7,74 @@ using System.Numerics;
 
 namespace NEP5
 {
+    [ManifestExtra("Author", "Chen, Zhitong")]
+    [ManifestExtra("Email", "chenzhitong@onchain.com")]
+    [ManifestExtra("Description", "This is a NEP5 example")]
     [Features(ContractFeatures.HasStorage)]
     public class NEP5 : SmartContract
     {
-        [DisplayName("transfer")]
-        public static event Action<byte[], byte[], BigInteger> Transferred;
+        [DisplayName("Transfer")]
+        public static event Action<byte[], byte[], BigInteger> OnTransfer;
 
         private static readonly BigInteger TotalSupplyValue = 10000000000000000;
 
         private static readonly byte[] Owner = "NfKA6zAixybBHHpmaPYPDywoqDaKzfMPf9".ToScriptHash(); //Owner Address
 
-        public static object Main(string method, object[] args)
-        {
-            if (Runtime.Trigger == TriggerType.Verification)
-            {
-                return Runtime.CheckWitness(Owner);
-            }
-            else if (Runtime.Trigger == TriggerType.Application)
-            {
-                var callscript = ExecutionEngine.CallingScriptHash;
-
-                if (method == "deploy") return Deploy();
-
-                if (method == "balanceOf") return BalanceOf((byte[])args[0]);
-
-                if (method == "decimals") return Decimals();
-
-                if (method == "name") return Name();
-
-                if (method == "symbol") return Symbol();
-
-                if (method == "supportedStandards") return SupportedStandards();
-
-                if (method == "totalSupply") return TotalSupply();
-
-                if (method == "transfer") return Transfer((byte[])args[0], (byte[])args[1], (BigInteger)args[2], callscript);
-
-                if (method == "update") return Update((byte[])args[0], (string)args[1]);
-            }
-            return false;
-        }
-
-        [DisplayName("deploy")]
         public static bool Deploy()
         {
             if (TotalSupply() != 0) return false;
-            StorageMap contract = Storage.CurrentContext.CreateMap(nameof(contract)); //Storage Map 不能放在全局变量，否则调用合约会失败，也许是 Bug
-            contract.Put("totalSupply", TotalSupplyValue);
-            StorageMap asset = Storage.CurrentContext.CreateMap(nameof(asset));
-            asset.Put(Owner, TotalSupplyValue);
-            Transferred(null, Owner, TotalSupplyValue);
+
+            TotalSupplyStorage.Increase(TotalSupplyValue);
+            AssetStorage.Increase(Owner, TotalSupplyValue);
+
+            OnTransfer(null, Owner, TotalSupplyValue);
             return true;
         }
 
-        [DisplayName("balanceOf")]
-        public static BigInteger BalanceOf(byte[] account)
-        {
-            if (account.Length != 20)
-                throw new InvalidOperationException("The parameter account SHOULD be 20-byte addresses.");
-            StorageMap asset = Storage.CurrentContext.CreateMap(nameof(asset));
-            return asset.Get(account).TryToBigInteger();
-        }
+        public static BigInteger BalanceOf(byte[] account) => AssetStorage.Get(account);
 
-        [DisplayName("decimals")]
         public static byte Decimals() => 8;
 
-        private static bool IsPayable(byte[] to)
-        {
-            var c = Blockchain.GetContract(to);
-            return c == null || c.IsPayable;
-        }
-
-        [DisplayName("name")]
         public static string Name() => "MyToken"; //name of the token
 
-        [DisplayName("symbol")]
         public static string Symbol() => "MYT"; //symbol of the token
 
-        [DisplayName("supportedStandards")]
         public static string[] SupportedStandards() => new string[] { "NEP-5", "NEP-7", "NEP-10" };
 
-        [DisplayName("totalSupply")]
-        public static BigInteger TotalSupply()
+        public static BigInteger TotalSupply() => TotalSupplyStorage.Get();
+
+        public static bool Transfer(byte[] from, byte[] to, BigInteger amount)
         {
-            StorageMap contract = Storage.CurrentContext.CreateMap(nameof(contract));
-            return contract.Get("totalSupply").TryToBigInteger();
-        }
+            if (!ValidateAddress(from) || !ValidateAddress(to)) throw new Exception("The parameters from and to SHOULD be 20-byte addresses.");
+            if (amount <= 0) throw new Exception("The parameter amount MUST be greater than 0.");
+            if (!IsPayable(to)) throw new Exception("Receiver cannot receive.");
+            if (!Runtime.CheckWitness(from) && !from.Equals(ExecutionEngine.CallingScriptHash)) throw new Exception("No authorization.");
+            if (AssetStorage.Get(from) < amount) throw new Exception("Insufficient balance.");
+            if (amount == 0 || from == to) return true;
 
-#if DEBUG
-        [DisplayName("transfer")] //Only for ABI file
-        public static bool Transfer(byte[] from, byte[] to, BigInteger amount) => true;
-#endif
-        //Methods of actual execution
-        private static bool Transfer(byte[] from, byte[] to, BigInteger amount, byte[] callscript)
-        {
-            //Check parameters
-            if (from.Length != 20 || to.Length != 20)
-                throw new InvalidOperationException("The parameters from and to SHOULD be 20-byte addresses.");
-            if (amount <= 0)
-                throw new InvalidOperationException("The parameter amount MUST be greater than 0.");
-            if (!IsPayable(to))
-                return false;
-            if (!Runtime.CheckWitness(from) && from.TryToBigInteger() != callscript.TryToBigInteger())
-                return false;
-            StorageMap asset = Storage.CurrentContext.CreateMap(nameof(asset));
-            var fromAmount = asset.Get(from).TryToBigInteger();
-            if (fromAmount < amount)
-                return false;
-            if (from == to)
-                return true;
+            AssetStorage.Reduce(from, amount);
+            AssetStorage.Increase(to, amount);
 
-            //Reduce payer balances
-            if (fromAmount == amount)
-                asset.Delete(from);
-            else
-                asset.Put(from, fromAmount - amount);
-
-            //Increase the payee balance
-            var toAmount = asset.Get(to).TryToBigInteger();
-            asset.Put(to, toAmount + amount);
-
-            Transferred(from, to, amount);
+            OnTransfer(from, to, amount);
             return true;
         }
 
-        [DisplayName("update")]
         public static bool Update(byte[] script, string manifest)
         {
-            if (!Runtime.CheckWitness(Owner)) return false;
+            if (!IsOwner()) return false;
             Contract.Update(script, manifest);
             return true;
         }
+
+        private static bool IsOwner() => Runtime.CheckWitness(Owner);
+
+        private static bool IsPayable(byte[] to) => Blockchain.GetContract(to)?.IsPayable ?? true;
+
+        private static bool ValidateAddress(byte[] address) => address.Length == 20 && address.TryToBigInteger() != 0;
     }
 
     public static class Helper
     {
-        public static BigInteger TryToBigInteger(this byte[] value)
-        {
-            return value?.ToBigInteger() ?? 0;
-        }
+        public static BigInteger TryToBigInteger(this byte[] value) => value?.ToBigInteger() ?? 0;
     }
 }

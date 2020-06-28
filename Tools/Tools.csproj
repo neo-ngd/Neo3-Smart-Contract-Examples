@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Neo" Version="3.0.0-CI00860" />
+    <PackageReference Include="Neo.SmartContract.Framework" Version="3.0.0-CI00154" />
   </ItemGroup>
 
 </Project>

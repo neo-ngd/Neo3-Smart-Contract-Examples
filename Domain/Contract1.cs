@@ -4,56 +4,39 @@ using System.ComponentModel;
 
 namespace Domain
 {
+    [ManifestExtra("Author", "Chen, Zhitong")]
+    [ManifestExtra("Email", "chenzhitong@onchain.com")]
+    [ManifestExtra("Description", "This is a Domain example")]
     [Features(ContractFeatures.HasStorage)]
     public class Contract1 : SmartContract
     {
-        public static object Main(string method, params object[] args)
-        {
-            return method switch
-            {
-                "query" => Query((string)args[0]),
-                "register" => Register((string)args[0], (byte[])args[1]),
-                "transfer" => Transfer((string)args[0], (byte[])args[1]),
-                "delete" => Delete((string)args[0]),
-                _ => false,
-            };
-        }
+        public static byte[] Query(string domain) => DomainStorage.Get(domain);
 
-        [DisplayName("query")]
-        private static byte[] Query(string domain)
+        public static bool Register(string domain, byte[] owner)
         {
-            return Storage.Get(Storage.CurrentContext, domain);
-        }
-
-        [DisplayName("register")]
-        private static bool Register(string domain, byte[] owner)
-        {
+            if (DomainStorage.Exist(domain)) return false;
             if (!Runtime.CheckWitness(owner)) return false;
-            byte[] value = Storage.Get(Storage.CurrentContext, domain);
-            if (value != null) return false;
-            Storage.Put(Storage.CurrentContext, domain, owner);
+            DomainStorage.Put(domain, owner);
             return true;
         }
 
-        [DisplayName("transfer")]
-        private static bool Transfer(string domain, byte[] to)
+        public static bool Transfer(string domain, byte[] to)
         {
+            if (DomainStorage.Exist(domain)) return false;
             if (!Runtime.CheckWitness(to)) return false;
-            byte[] from = Storage.Get(Storage.CurrentContext, domain);
-            if (from == null) return false;
-            if (!Runtime.CheckWitness(from)) return false;
-            Storage.Put(Storage.CurrentContext, domain, to);
+            if (!IsDomainOwner(domain)) return false;
+            DomainStorage.Put(domain, to);
             return true;
         }
 
-        [DisplayName("delete")]
-        private static bool Delete(string domain)
+        public static bool Remove(string domain)
         {
-            byte[] owner = Storage.Get(Storage.CurrentContext, domain);
-            if (owner == null) return false;
-            if (!Runtime.CheckWitness(owner)) return false;
-            Storage.Delete(Storage.CurrentContext, domain);
+            if (DomainStorage.Exist(domain)) return false;
+            if (!IsDomainOwner(domain)) return false;
+            DomainStorage.Remove(domain);
             return true;
         }
+
+        private static bool IsDomainOwner(string key) => Runtime.CheckWitness(DomainStorage.Get(key));
     }
 }
